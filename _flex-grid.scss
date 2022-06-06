@@ -19,6 +19,7 @@
  * $fg-class-col string used for the column class
  * $fg-class-off string used for the offset class
  */
+
 $fg-columns: 12 !default;
 $fg-gutter: 0.5rem !default;
 
@@ -50,6 +51,20 @@ $fg-breakpoints: (
   (md, 992px),
   (lg, 1200px)
 ) !default;
+
+$spacer: 1rem !default;
+
+$gutters: (
+  0: 0,
+  1: $spacer * .25,
+  2: $spacer * .5,
+  3: $spacer,
+  4: $spacer * 1.5,
+  5: $spacer * 3,
+) !default;
+
+$variable-prefix: bs- !default;
+
 
 /**
  * Class Name Defaults
@@ -88,26 +103,22 @@ $fg-breakpoints: (
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  @include spacing( ( -$fg-gutter ), margin, horizontal );
+  --#{$variable-prefix}gutter-y: #{$fg-gutter};
+  // --#{$variable-prefix}gutter-x: #{$fg-gutter};
+  // margin-top: calc(-1 * var(--#{$variable-prefix}gutter-y));
+  @include spacing( calc(-.5 * var(--#{$variable-prefix}gutter-y)), margin, horizontal );
 }
 
 
 %#{ $fg-class-col } {
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
   flex-grow: 0;
   flex-shrink: 0;
   min-height: 1px;
-  @include spacing( ( $fg-gutter ), padding, horizontal );
+  margin-top: var(--#{$variable-prefix}gutter-y);
+  @include spacing( var(--#{$variable-prefix}gutter-y), padding, horizontal );
 }
 
-%#{ $fg-class-col }-flex {
-  @extend %#{ $fg-class-col };
-  flex-grow: 1;
-  flex-basis: 0;
-  max-width: 100%;
-}
 
 
 /**
@@ -119,14 +130,29 @@ $fg-breakpoints: (
  * .#{ $fg-class-off }-[namespace]-reset for resetting a col's offset for that and larger namespaces
  */
 
-@mixin grid-base( $namespace ) {
-  .#{ $fg-class-col }-#{$namespace} {
-    @extend %#{ $fg-class-col }-flex;
-  }
+
+
+@mixin grid-base( $namespace: "", $prefix: "-") {
 
   @for $i from 1 through $fg-columns {
-    .#{ $fg-class-col }-#{$namespace}-#{$i} {
+    .#{ $fg-class-col } {
       @extend %#{ $fg-class-col };
+    }
+    .#{ $fg-class-col }#{$prefix}#{$namespace}-#{$i} {
+      flex-basis: get-col-percent($i);
+      max-width:  get-col-percent($i);
+    }
+  }
+
+  @each $key, $value in $gutters {
+    .g-#{$namespace}#{$prefix}#{$key},
+    .gx-#{$namespace}#{$prefix}#{$key} {
+      --#{$variable-prefix}gutter-x: #{$value};
+    }
+
+    .g-#{$namespace}#{$prefix}#{$key},
+    .gy-#{$namespace}#{$prefix}#{$key} {
+      --#{$variable-prefix}gutter-y: #{$value};
     }
   }
 }
@@ -156,7 +182,21 @@ $fg-breakpoints: (
     margin-left: 0;
   }
 
+  @each $key, $value in $gutters {
+    .g-#{$namespace}-#{$key},
+    .gx-#{$namespace}-#{$key} {
+      --#{$variable-prefix}gutter-x: #{$value};
+    }
+
+    .g-#{$namespace}-#{$key},
+    .gy-#{$namespace}-#{$key} {
+      --#{$variable-prefix}gutter-y: #{$value};
+    }
+  }
+
 }
+
+
 
 
 /**
@@ -164,26 +204,26 @@ $fg-breakpoints: (
  * Step 1, for each namespace, create the grid-base
  * Step 2, for each namespace, wrap the col width/offset measurements in their breakpoint media query
  */
-@each $val in $fg-breakpoints {
 
-  $namespace: nth($val, 1);
-  @include grid-base( $namespace );
+@include grid-base("", "");
+// @each $val in $fg-breakpoints {
 
-}
+//   $namespace: nth($val, 1);
+//   @include grid-base( $namespace );
 
-@each $val in $fg-breakpoints {
-  @if length($val) == 1 {
+// }
 
-    $namespace: nth($val, 1);
-    @include grid-sizes( $namespace );
+@each $key, $val in $fg-breakpoints {
+  $matched-breakpoint: map-get($fg-breakpoints, $key);
+  @debug $matched-breakpoint;
+  @if length($fg-breakpoints) == 1 {
+
+    @include grid-sizes( $key );
 
   } @else {
 
-    $namespace: nth($val, 1);
-    $size: nth($val, 2);
-
-    @media only screen and (min-width: #{$size}) {
-      @include grid-sizes( $namespace );
+    @media only screen and #{ $matched-breakpoint } {
+      @include grid-sizes( $key );
     }
   }
 }
