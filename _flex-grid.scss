@@ -104,9 +104,9 @@ $variable-prefix: bs- !default;
   flex-direction: row;
   flex-wrap: wrap;
   --#{$variable-prefix}gutter-y: #{$fg-gutter};
-  // --#{$variable-prefix}gutter-x: #{$fg-gutter};
-  // margin-top: calc(-1 * var(--#{$variable-prefix}gutter-y));
-  @include spacing( calc(-.5 * var(--#{$variable-prefix}gutter-y)), margin, horizontal );
+  --#{$variable-prefix}gutter-x: #{$fg-gutter};
+  margin-top: calc(-1 * var(--#{$variable-prefix}gutter-y));
+  @include spacing( calc(-.5 * var(--#{$variable-prefix}gutter-x)), margin, horizontal );
 }
 
 
@@ -116,7 +116,7 @@ $variable-prefix: bs- !default;
   flex-shrink: 0;
   min-height: 1px;
   margin-top: var(--#{$variable-prefix}gutter-y);
-  @include spacing( var(--#{$variable-prefix}gutter-y), padding, horizontal );
+  @include spacing( calc(0.5 * var(--#{$variable-prefix}gutter-x)), padding, horizontal );
 }
 
 
