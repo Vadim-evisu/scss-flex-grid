@@ -65,6 +65,24 @@ $gutters: (
 
 $variable-prefix: bs- !default;
 
+$justification-config: (
+  'justify-content-start': flex-start,
+  'justify-content-center': center,
+  'justify-content-end': flex-end,
+  'justify-content-around': space-around,
+  'justify-content-between': space-between,
+  'justify-content-evenly': space-evenly,
+);
+
+$col-spacer: (
+  'ms-auto': (
+    'margin-inline-start': auto
+  ),
+  'me-auto': (
+    'margin-inline-end': auto
+  ),
+);
+
 
 /**
  * Class Name Defaults
@@ -159,6 +177,7 @@ $variable-prefix: bs- !default;
 
 @mixin grid-sizes( $namespace ) {
 
+
   // Run the loop for as many columns as speficied
   @for $i from 1 through $fg-columns {
     .#{ $fg-class-col }-#{$namespace}-#{$i} {
@@ -197,6 +216,42 @@ $variable-prefix: bs- !default;
 }
 
 
+@mixin justification-generation ( $responsive-prefix: "", $responsive: false ) {
+  @if ($responsive) {
+    @each $key, $value in $justification-config {
+      .#{$key}-#{$responsive-prefix} {
+        justify-content: #{$value};
+      }
+    }
+  } @else {
+    @each $key, $value in $justification-config {
+      .#{$key} {
+        justify-content: #{$value};
+      }
+    }
+  }
+
+};
+
+@mixin spacing-generation ( $responsive-prefix: "", $responsive: false ) {
+  @if ($responsive) {
+    @each $key, $value in $col-spacer {
+      @each $property, $val in $value {
+        .#{$key}-#{$responsive-prefix} {
+          #{$property}: #{$val};
+        }
+      }
+    }
+  } @else {
+    @each $key, $value in $col-spacer {
+      @each $property, $val in $value {
+        .#{$key} {
+          #{$property}: #{$val};
+        }
+      }
+    }
+  }
+}
 
 
 /**
@@ -206,6 +261,8 @@ $variable-prefix: bs- !default;
  */
 
 @include grid-base("", "");
+@include justification-generation();
+@include spacing-generation();
 // @each $val in $fg-breakpoints {
 
 //   $namespace: nth($val, 1);
@@ -213,17 +270,21 @@ $variable-prefix: bs- !default;
 
 // }
 
+
 @each $key, $val in $fg-breakpoints {
   $matched-breakpoint: map-get($fg-breakpoints, $key);
-  @debug $matched-breakpoint;
   @if length($fg-breakpoints) == 1 {
 
     @include grid-sizes( $key );
+    @include justification-generation($key, $responsive: true);
+    @include spacing-generation($key, $responsive: true);
 
   } @else {
 
     @media only screen and #{ $matched-breakpoint } {
       @include grid-sizes( $key );
+      @include justification-generation($key, $responsive: true);
+      @include spacing-generation($key, $responsive: true);
     }
   }
 }
